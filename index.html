@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Buen Bocado | Experiencia Gastronómica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- VARIABLES PREMIUM --- */
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E5B5;
+            --black: #0a0a0a;
+            --dark: #1a1a1a;
+            --charcoal: #2d2d2d;
+            --cream: #FAF7F2;
+            --white: #FFFFFF;
+            --gray: #8a8a8a;
+            --accent: #C41E3A;
+        }
+
+        [data-theme="dark"] {
+            --cream: #1a1a1a;
+            --white: #2d2d2d;
+            --dark: #FAF7F2;
+            --gray: #b0b0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--cream);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* --- CARRITO FIJO PREMIUM --- */
+        .cart-fixed {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--white);
+            padding: 1.2rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--gold);
+        }
+
+        .cart-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .cart-icon {
+            font-size: 2rem;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: var(--black);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 2px solid var(--white);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .cart-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-label {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .cart-center {
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-checkout {
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: var(--black);
+            padding: 0.9rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-checkout:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-checkout:disabled {
+            background: var(--charcoal);
+            color: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .cart-right {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-admin {
+            background: transparent;
+            color: var(--gold);
+            padding: 0.9rem 1.8rem;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-admin:hover {
+            background: var(--gold);
+            color: var(--black);
+            transform: translateY(-2px);
+        }
+
+        .btn-theme {
+            background: transparent;
+            color: var(--white);
+            padding: 0.9rem;
+            border: 2px solid var(--gray);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-theme:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* --- HEADER ELEGANTE --- */
+        header {
+            background: rgba(250, 247, 242, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 100;
+        }
+
+        [data-theme="dark"] header {
+            background: rgba(26, 26, 26, 0.95);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        [data-theme="dark"] .logo {
+            color: var(--white);
+        }
+
+        .logo span {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 3rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: var(--gold);
+        }
+
+        /* --- HERO SECTION PREMIUM --- */
+        .hero {
+            background: linear-gradient(135deg, rgba(10,10,10,0.8) 0%, rgba(26,26,26,0.6) 100%), 
+                        url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1920&q=80') center/cover;
+            color: var(--white);
+            text-align: center;
+            padding: 10rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            font-weight: 900;
+        }
+
+        .hero h1 span {
+            color: var(--gold);
+            font-style: italic;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: var(--black);
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+
+        /* --- SECCIONES --- */
+        .section {
+            padding: 8rem 5%;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-subtitle {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-weight: 900;
+        }
+
+        .section-divider {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold) 0%, #B8860B 100%);
+            margin: 0 auto;
+        }
+
+        /* --- MENÚ GRID --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .menu-card {
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .menu-card-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .menu-card:hover .menu-card-image {
+            transform: scale(1.05);
+        }
+
+        .menu-card-content {
+            padding: 2rem;
+        }
+
+        .menu-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .menu-card p {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .price-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-add {
+            background: var(--dark);
+            color: var(--white);
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        [data-theme="dark"] .btn-add {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-add:hover {
+            background: var(--gold);
+            color: var(--black);
+            transform: scale(1.05);
+        }
+
+        /* --- PROMOCIONES --- */
+        .promos-section {
+            background: linear-gradient(135deg, var(--black) 0%, var(--charcoal) 100%);
+            color: var(--white);
+        }
+
+        .promos-section .section-title {
+            color: var(--white);
+        }
+
+        .promo-card {
+            background: var(--charcoal);
+            border: 2px solid var(--gold);
+            position: relative;
+        }
+
+        .promo-card:hover {
+            border-color: var(--gold-light);
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.2);
+        }
+
+        .promo-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: var(--black);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .promo-card .price {
+            color: var(--gold);
+        }
+
+        /* --- GALERÍA --- */
+        .gallery-section {
+            background: var(--cream);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.8) 0%, rgba(184, 134, 11, 0.8) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+
+        .gallery-overlay span {
+            color: var(--black);
+            font-size: 3rem;
+        }
+
+        /* --- SOBRE NOSOTROS --- */
+        .about-section {
+            background: var(--white);
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .about-image {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .about-text h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: var(--dark);
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--gray);
+            line-height: 1.8;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+        }
+
+        .feature-text {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* --- TESTIMONIOS --- */
+        .testimonials-section {
+            background: var(--cream);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            font-family: 'Playfair Display', serif;
+            font-size: 6rem;
+            color: var(--gold);
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-size: 1.05rem;
+            color: var(--dark);
+            margin-bottom: 2rem;
+            font-style: italic;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--black);
+            font-size: 1.2rem;
+        }
+
+        .author-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .author-info p {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .stars {
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* --- BANNER SUSCRIPCIÓN --- */
+        .subscribe-section {
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            padding: 5rem 5%;
+            text-align: center;
+        }
+
+        .subscribe-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .subscribe-section h2 {
+            font-size: 2.5rem;
+            color: var(--black);
+            margin-bottom: 1rem;
+        }
+
+        .subscribe-section p {
+            color: var(--dark);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .subscribe-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .subscribe-form input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .subscribe-form button {
+            background: var(--black);
+            color: var(--gold);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .subscribe-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* --- MAPA --- */
+        .map-section {
+            background: var(--white);
+        }
+
+        .map-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+        }
+
+        /* --- CONTACTO --- */
+        .contact {
+            background: var(--black);
+            color: var(--white);
+            padding: 6rem 5%;
+        }
+
+        .contact-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4rem;
+            text-align: center;
+        }
+
+        .contact-item {
+            padding: 2rem;
+        }
+
+        .contact-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--gold);
+        }
+
+        .contact-item h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .contact-item p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background: var(--dark);
+            color: var(--gray);
+            text-align: center;
+            padding: 3rem 5%;
+            border-top: 1px solid var(--charcoal);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--white);
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo span {
+            color: var(--gold);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        /* --- MODAL CHECKOUT PREMIUM --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 3.5rem;
+            max-width: 550px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideIn 0.4s ease-out;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+        }
+
+        .modal-content.large {
+            max-width: 900px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--cream);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--gold);
+            color: var(--black);
+            transform: rotate(90deg);
+        }
+
+        .modal h2 {
+            color: var(--dark);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            font-size: 2.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.7rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 1.2rem;
+            border: 2px solid var(--cream);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            background: var(--white);
+            color: var(--dark);
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+        }
+
+        .order-summary {
+            background: var(--cream);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2.5rem;
+        }
+
+        .order-summary h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-size: 1.3rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--gold);
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: var(--black);
+            padding: 1.3rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-danger {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 15px 40px rgba(196, 30, 58, 0.4);
+        }
+
+        /* --- CÓDIGO DE RETIRO --- */
+        .code-display {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .code-display h2 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .code-message {
+            color: var(--gray);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .code-number {
+            background: linear-gradient(135deg, var(--black) 0%, var(--charcoal) 100%);
+            color: var(--gold);
+            font-size: 2.5rem;
+            font-weight: 900;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2.5rem 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            letter-spacing: 4px;
+            font-family: 'Poppins', sans-serif;
+            border: 3px solid var(--gold);
+        }
+
+        /* --- PANEL ADMIN --- */
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--cream);
+        }
+
+        .admin-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+        }
+
+        .admin-tab.active {
+            color: var(--gold);
+            border-bottom: 3px solid var(--gold);
+            margin-bottom: -2px;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-item {
+            background: var(--cream);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-item-info {
+            flex: 1;
+        }
+
+        .admin-item-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: var(--dark);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .admin-item-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .admin-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-edit {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-delete {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .btn-add-new {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--dark);
+            color: var(--gold);
+            border: 2px dashed var(--gold);
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-top: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-add-new:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        /* --- BOTÓN FLOTANTE WHATSAPP --- */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+            z-index: 999;
+            transition: all 0.3s;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 968px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .cart-fixed {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .cart-right {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3rem; }
+            .section-title { font-size: 2.5rem; }
+            nav ul { gap: 1.5rem; font-size: 0.85rem; }
+            .modal-content { padding: 2.5rem; }
+            .code-number { font-size: 1.8rem; letter-spacing: 2px; }
+            .about-features { grid-template-columns: 1fr; }
+            .subscribe-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CARRITO FIJO PREMIUM -->
+    <div class="cart-fixed">
+        <div class="cart-info">
+            <div class="cart-icon">
+                
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <div class="cart-details">
+                <span class="cart-label">Total del pedido</span>
+                <div class="cart-total" id="cartTotal">$0.00</div>
+            </div>
+        </div>
+        <div class="cart-center">
+            <button class="btn-checkout" id="btnCheckout" disabled onclick="openCheckout()">
+                Finalizar Pedido
+            </button>
+        </div>
+        <div class="cart-right">
+            <button class="btn-theme" onclick="toggleTheme()" title="Cambiar tema">
+                🌙
+            </button>
+            <a class="btn-admin" href="admin.html">
+                Administrador
+            </a>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <a href="#" class="logo" id="brandLink"><span id="brandLogo"></span><span id="brandName">El Buen <span>Bocado</span></span></a>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#menu">Menú</a></li>
+                <li><a href="#promos">Promos</a></li>
+                <li><a href="#galeria">Galería</a></li>
+                <li><a href="#nosotros">Nosotros</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <div class="hero-subtitle" id="heroSubtitle">Experiencia Gastronómica</div>
+            <h1>Sabor que <span>Enamora</span></h1>
+            <p>Ingredientes premium, recetas artesanales y una experiencia culinaria que trasciende lo ordinario. Cada bocado cuenta una historia.</p>
+            <a href="#menu" class="btn-primary">Explorar Menú</a>
+        </div>
+    </section>
+
+    <!-- MENÚ -->
+    <section class="section" id="menu">
+        <div class="section-header">
+            <div class="section-subtitle">Nuestra Carta</div>
+            <h2 class="section-title">Menú Signature</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="menu-grid" id="menuGrid">
+            <!-- Los productos se cargan dinámicamente -->
+        </div>
+    </section>
+
+    <!-- PROMOCIONES -->
+    <section class="section promos-section" id="promos">
+        <div class="section-header">
+            <div class="section-subtitle" style="color: var(--gold-light);">Ofertas Exclusivas</div>
+            <h2 class="section-title">Promociones Especiales</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="menu-grid" id="promosGrid">
+            <!-- Las promociones se cargan dinámicamente -->
+        </div>
+    </section>
+
+    <!-- GALERÍA -->
+    <section class="section gallery-section" id="galeria">
+        <div class="section-header">
+            <div class="section-subtitle">Nuestro Espacio</div>
+            <h2 class="section-title">Galería</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80" alt="Interior del restaurante">
+                <div class="gallery-overlay"><span>️</span></div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="Barra del restaurante">
+                <div class="gallery-overlay"><span>👁️</span></div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80" alt="Plato gourmet">
+                <div class="gallery-overlay"><span>👁️</span></div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80" alt="Ambiente">
+                <div class="gallery-overlay"><span>👁️</span></div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&q=80" alt="Restaurante">
+                <div class="gallery-overlay"><span>👁️</span></div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&q=80" alt="Cocina">
+                <div class="gallery-overlay"><span>👁️</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOBRE NOSOTROS -->
+    <section class="section about-section" id="nosotros">
+        <div class="about-content">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="Nuestro restaurante" class="about-image">
+            <div class="about-text">
+                <div class="section-subtitle">Nuestra Historia</div>
+                <h2>Pasión por la Excelencia</h2>
+                <p>Desde 2015, nos hemos dedicado a redefinir la experiencia de la comida rápida. Cada ingrediente es seleccionado cuidadosamente, cada receta es perfeccionada con amor.</p>
+                <p>Creemos que la comida rápida no debe sacrificar calidad. Por eso, trabajamos con proveedores locales y utilizamos técnicas culinarias que honran la tradición.</p>
+                
+                <div class="about-features">
+                    <div class="feature">
+                        <div class="feature-icon">🥩</div>
+                        <div class="feature-text">Carne 100% Angus</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🌱</div>
+                        <div class="feature-text">Ingredientes Frescos</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon"></div>
+                        <div class="feature-text">Servicio Rápido</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">❤️</div>
+                        <div class="feature-text">Hecho con Amor</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIOS -->
+    <section class="section testimonials-section">
+        <div class="section-header">
+            <div class="section-subtitle">Testimonios</div>
+            <h2 class="section-title">Lo Que Dicen Nuestros Clientes</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="testimonials-grid">
+            
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">"La mejor hamburguesa que he probado en años. El queso cheddar se derrite perfectamente y la carne tiene un sabor increíble. Volveré sin duda."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">M</div>
+                    <div class="author-info">
+                        <h4>María González</h4>
+                        <p>Cliente frecuente</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">"El ambiente es elegante pero acogedor. Las papas supreme son adictivas. El servicio es rápido y el personal muy amable. 100% recomendado."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">C</div>
+                    <div class="author-info">
+                        <h4>Carlos Rodríguez</h4>
+                        <p>Foodie local</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p class="testimonial-text">"Pedí el combo familiar para una reunión y todos quedaron encantados. La calidad es premium y el precio muy justo. Mi nuevo lugar favorito."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">A</div>
+                    <div class="author-info">
+                        <h4>Ana Martínez</h4>
+                        <p>Madre de familia</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- BANNER SUSCRIPCIÓN -->
+    <section class="subscribe-section">
+        <div class="subscribe-content">
+            <h2>Recibe Ofertas Exclusivas</h2>
+            <p>Suscríbete y obtén un 10% de descuento en tu primer pedido, además de promociones especiales cada semana.</p>
+            <form class="subscribe-form" onsubmit="handleSubscribe(event)">
+                <input type="email" placeholder="Tu correo electrónico" required>
+                <button type="submit">Suscribirme</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- MAPA -->
+    <section class="section map-section" id="ubicacion">
+        <div class="section-header">
+            <div class="section-subtitle">Encuéntranos</div>
+            <h2 class="section-title">Nuestra Ubicación</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3284.016887889508!2d-58.38375908477038!3d-34.60373888045943!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccacb4f0b0e3d%3A0x3c5e0e0e0e0e0e0e!2sObelisco!5e0!3m2!1ses!2sar!4v1234567890123!5m2!1ses!2sar" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </section>
+
+    <!-- CONTACTO -->
+    <section class="contact" id="contacto">
+        <div class="section-header">
+            <div class="section-subtitle" style="color: var(--gold);">Contáctanos</div>
+            <h2 class="section-title" style="color: var(--white);">Visítanos</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="contact-content">
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <h3>Ubicación</h3>
+                <p id="contactDireccion">Av. Principal 123<br>Centro Histórico</p>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">🕐</div>
+                <h3>Horario</h3>
+                <p>Lunes a Domingo<br>11:00 AM - 11:00 PM</p>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <h3>Contacto</h3>
+                <p id="contactTelefono">+54 9 11 1234-5678</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo" id="footerName">El Buen <span>Bocado</span></div>
+            <p>Encargá online y retirá en el local con tu código. 🍔</p>
+            <div style="margin:18px 0">
+                <button onclick="compartirTienda()" style="background:transparent;color:var(--gold);border:2px solid var(--gold);border-radius:50px;padding:12px 26px;font-weight:700;font-size:.85rem;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:'Poppins',sans-serif">📤 Compartir esta página</button>
+            </div>
+            <div style="max-width:460px;margin:24px auto 0;background:var(--charcoal);border:1px solid var(--gold);border-radius:16px;padding:18px 20px;text-align:center">
+                <div style="font-weight:700;color:var(--gold);font-size:.95rem;margin-bottom:4px">🍔 ¿Querés una página como esta para tu negocio?</div>
+                <div style="color:var(--gray);font-size:.82rem;line-height:1.5;margin-bottom:12px">
+                    <b style="color:#fff">Comida Rápida</b> — tu local online en minutos: menú, promos y pedidos para retirar, sin complicaciones.
+                </div>
+                <a href="mailto:dragoprot26@gmail.com?subject=Solicito%20mi%20app%20Comida%20R%C3%A1pida&body=Hola%2C%20quiero%20solicitar%20mi%20aplicaci%C3%B3n%20Comida%20R%C3%A1pida%20para%20mi%20negocio."
+                   style="display:inline-block;background:linear-gradient(135deg,var(--gold),#B8860B);color:var(--black);text-decoration:none;font-weight:700;font-size:.82rem;padding:11px 20px;border-radius:50px;text-transform:uppercase;letter-spacing:.06em">
+                    ✉️ Solicitala: dragoprot26@gmail.com
+                </a>
+                <div style="color:var(--gray);font-size:.72rem;margin-top:10px">Solicitá tu aplicación para tu negocio. Tu consulta no molesta 😊</div>
+            </div>
+            <p style="margin-top:22px">&copy; 2026 · Hecho con Comida Rápida. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- POPUP COMPARTIR -->
+    <div id="sharePop" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.7);align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+      <div style="background:var(--white);color:var(--dark);border-radius:20px;padding:26px;max-width:320px;width:90%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5)">
+        <h3 style="margin:0 0 4px;font-size:1.2rem">Compartir página</h3>
+        <p style="margin:0 0 16px;font-size:.85rem;color:var(--gray)">Envialo a tus clientes 👇</p>
+        <a id="shareWa" href="#" target="_blank" rel="noopener" style="display:block;background:#25D366;color:#fff;padding:13px;border-radius:50px;text-decoration:none;font-weight:700;margin-bottom:10px">📱 WhatsApp</a>
+        <a id="shareMail" href="#" style="display:block;background:linear-gradient(135deg,var(--gold),#B8860B);color:var(--black);padding:13px;border-radius:50px;text-decoration:none;font-weight:700">✉️ Mail</a>
+        <button onclick="document.getElementById('sharePop').style.display='none'" style="margin-top:14px;background:none;border:none;color:var(--gray);cursor:pointer;font-size:.85rem">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- MODAL DE CHECKOUT -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeCheckout()">×</button>
+            
+            <!-- FORMULARIO DE DATOS -->
+            <div id="checkoutForm">
+                <h2>Finalizar Pedido</h2>
+                
+                <div class="order-summary">
+                    <h3>Tu selección:</h3>
+                    <div id="orderItems"></div>
+                    <div class="order-total">
+                        <span>Total:</span>
+                        <span id="orderTotal">$0.00</span>
+                    </div>
+                </div>
+
+                <form onsubmit="submitOrder(event)">
+                    <div class="form-group">
+                        <label for="customerName">Nombre Completo</label>
+                        <input type="text" id="customerName" required placeholder="Ej: Juan Pérez">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerWhatsapp">WhatsApp</label>
+                        <input type="tel" id="customerWhatsapp" required value="+549 " placeholder="+549 11 1234-5678">
+                        <div id="checkoutErr" style="color:var(--accent);font-size:.85rem;margin-top:8px;min-height:1em"></div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        Confirmar Pedido
+                    </button>
+                </form>
+            </div>
+
+            <!-- CÓDIGO DE RETIRO -->
+            <div id="codeDisplay" style="display: none;">
+                <div class="code-display">
+                    <h2>¡Pedido Confirmado!</h2>
+                    <div class="code-message">
+                        Tu código de retiro seguro es:
+                    </div>
+                    <div class="code-number" id="pickupCode"></div>
+                    <div class="code-message">
+                        <strong>⚠️ Importante:</strong> Este código es único y seguro.<br>
+                        Presentalo al retirar tu pedido. Te contactaremos por WhatsApp para confirmarte el tiempo de preparación.
+                    </div>
+                    <button class="btn-submit" onclick="closeCheckout()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÓN FLOTANTE DE WHATSAPP -->
+    <a href="#" id="whatsappFloat" class="whatsapp-float" target="_blank" rel="noopener" title="Pedir por WhatsApp">
+        💬
+    </a>
+
+    <script>
+/* ====== NUBE (Supabase compartida) ====== */
+const SB_URL = 'https://pcxlhgdpxfuybzfsquem.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjeGxoZ2RweGZ1eWJ6ZnNxdWVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDIyOTQsImV4cCI6MjA5NjE3ODI5NH0.HJWpFO8TkRsmUx15GtSsUusjvVEhUsi5b_QGoPoPU00';
+
+/* Datos del local. En modo muestra (sin ?local=) se ven los demo de abajo. */
+const TIENDA = {
+  nombre: 'El Buen Bocado',
+  tagline: 'Experiencia Gastronómica',
+  logo: '',
+  direccion: 'Av. Principal 123, Centro Histórico',
+  telefono: ''
+};
+let TENANT = null;
+
+// --- DATOS DEMO (solo se ven en la página de muestra) ---
+const defaultProducts = [
+  { id: 1, name: 'La Clásica Rayo', desc: 'Carne angus 150g, queso cheddar añejado, lechuga fresca, tomate heirloom y nuestra salsa secreta de la casa.', price: 5.99, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80' },
+  { id: 2, name: 'Papas Supreme', desc: 'Papas rústicas crujientes bañadas en queso cheddar fundido y tocino ahumado artesanal.', price: 3.50, image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800&q=80' },
+  { id: 3, name: 'Hot Dog Especial', desc: 'Salchicha premium jumbo, cebolla caramelizada, mostaza dijon y ketchup artesanal de la casa.', price: 4.20, image: 'https://images.unsplash.com/photo-1612392062631-94dd858cba88?w=800&q=80' },
+  { id: 4, name: 'Bebida Premium', desc: 'Refresco artesanal de 500ml: Coca-Cola, Sprite, Fanta o agua mineral con gas.', price: 2.00, image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80' }
+];
+const defaultPromos = [
+  { id: 1, name: 'Combo Individual', desc: 'Hamburguesa clásica + Papas medianas + Bebida 500ml. La experiencia completa.', price: 8.99, badge: '-20% OFF', image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=800&q=80' },
+  { id: 2, name: 'Dos Hot Dogs', desc: 'Lleva 2 Hot Dogs Especiales al precio de 1. Oferta por tiempo limitado.', price: 4.20, badge: '2x1', image: 'https://images.unsplash.com/photo-1612392062631-94dd858cba88?w=800&q=80' },
+  { id: 3, name: 'Combo Familiar', desc: '4 Hamburguesas clásicas + 2 Papas grandes + 4 Bebidas. Para compartir momentos.', price: 19.99, badge: 'FAMILIAR', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=80' }
+];
+
+let products = defaultProducts.slice();
+let promos = defaultPromos.slice();
+
+function esImg(s){ return typeof s === 'string' && s.indexOf('data:') === 0; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function money(n){ return '$' + (Number(n)||0).toFixed(2); }
+
+/* Si la URL trae ?local=CODIGO, traemos ese local de la nube */
+async function cargarTienda(){
+  const codigo = new URLSearchParams(location.search).get('local');
+  if(!codigo) return;                 // sin código → página de muestra
+  TENANT = codigo;
+  try{
+    const res = await fetch(`${SB_URL}/rest/v1/rpc/comida_publica`, {
+      method:'POST', cache:'no-store',
+      headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json' },
+      body: JSON.stringify({ p_codigo: codigo })
+    });
+    const d = res.ok ? await res.json() : null;
+    if(d){
+      TIENDA.nombre    = d.nombre_local || 'Comida Rápida';
+      TIENDA.tagline   = d.tagline || '';
+      TIENDA.logo      = d.logo || '';
+      TIENDA.direccion = d.direccion || '';
+      TIENDA.telefono  = d.telefono || '';
+      try{ products = JSON.parse(d.productos || '[]'); }catch(e){ products = []; }
+      try{ promos   = JSON.parse(d.promos   || '[]'); }catch(e){ promos = []; }
+    } else {
+      products = []; promos = []; TIENDA.nombre = 'Comida Rápida'; TIENDA.tagline = '';
+    }
+  }catch(e){ console.warn('No se pudo cargar el local:', e); }
+}
+
+/* Marca / contacto dinámicos */
+function pintarMarca(){
+  const nm = TIENDA.nombre || 'Comida Rápida';
+  const bn = document.getElementById('brandName'); if(bn) bn.textContent = nm;
+  const fn = document.getElementById('footerName'); if(fn) fn.textContent = nm;
+  const bl = document.getElementById('brandLogo');
+  if(bl) bl.innerHTML = TIENDA.logo
+    ? (esImg(TIENDA.logo) ? `<img src="${TIENDA.logo}" style="width:1.7rem;height:1.7rem;border-radius:6px;object-fit:cover;vertical-align:middle">` : esc(TIENDA.logo))
+    : '';
+  const hs = document.getElementById('heroSubtitle'); if(hs && TIENDA.tagline) hs.textContent = TIENDA.tagline;
+  const cd = document.getElementById('contactDireccion'); if(cd && TIENDA.direccion) cd.textContent = TIENDA.direccion;
+  const ct = document.getElementById('contactTelefono'); if(ct && TIENDA.telefono) ct.textContent = TIENDA.telefono;
+  const wf = document.getElementById('whatsappFloat');
+  const tel = (TIENDA.telefono||'').replace(/\D/g,'');
+  if(wf){
+    if(tel){ wf.href = `https://wa.me/${tel}?text=${encodeURIComponent('Hola! Quiero hacer un pedido en '+nm)}`; wf.style.display='flex'; }
+    else { wf.style.display='none'; }
+  }
+  document.title = nm + ' | Pedí online';
+}
+
+/* --- RENDER MENÚ --- */
+function renderMenu() {
+  const grid = document.getElementById('menuGrid');
+  if(!products.length){ grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--gray);padding:40px 20px">Pronto vas a ver el menú acá. 🍔</div>`; return; }
+  grid.innerHTML = products.map(p => `
+    <div class="menu-card">
+      ${p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" class="menu-card-image">`:`<div class="menu-card-image" style="display:grid;place-items:center;font-size:4rem;background:var(--cream)">🍔</div>`}
+      <div class="menu-card-content">
+        <h3>${esc(p.name)}</h3>
+        <p>${esc(p.desc||'')}</p>
+        <div class="price-container">
+          <div class="price">${money(p.price)}</div>
+          <button class="btn-add" onclick="addToCart('${encodeURIComponent(p.name)}', ${Number(p.price)||0})">Agregar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPromos() {
+  const grid = document.getElementById('promosGrid');
+  const sec = document.getElementById('promos');
+  if(!promos.length){ if(sec) sec.style.display='none'; return; }
+  if(sec) sec.style.display='';
+  grid.innerHTML = promos.map(p => `
+    <div class="menu-card promo-card">
+      ${p.badge?`<div class="promo-badge">${esc(p.badge)}</div>`:''}
+      ${p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" class="menu-card-image">`:`<div class="menu-card-image" style="display:grid;place-items:center;font-size:4rem;background:var(--charcoal)">🔥</div>`}
+      <div class="menu-card-content">
+        <h3>${esc(p.name)}</h3>
+        <p>${esc(p.desc||'')}</p>
+        <div class="price-container">
+          <div class="price">${money(p.price)}</div>
+          <button class="btn-add" onclick="addToCart('${encodeURIComponent(p.name)}', ${Number(p.price)||0})">Agregar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* --- CARRITO --- */
+let cart = [];
+function addToCart(nameEnc, price) {
+  const name = decodeURIComponent(nameEnc);
+  cart.push({ name, price: Number(price)||0 });
+  updateCart();
+  const cartIcon = document.querySelector('.cart-icon');
+  if(cartIcon){ cartIcon.style.transform = 'scale(1.2)'; setTimeout(() => { cartIcon.style.transform = 'scale(1)'; }, 200); }
+}
+function updateCart() {
+  const count = cart.length;
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = money(total);
+  document.getElementById('btnCheckout').disabled = count === 0;
+}
+function openCheckout() {
+  if (cart.length === 0) return;
+  const orderItems = document.getElementById('orderItems');
+  orderItems.innerHTML = '';
+  cart.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'order-item';
+    div.innerHTML = `<span>${esc(item.name)}</span><span>${money(item.price)}</span>`;
+    orderItems.appendChild(div);
+  });
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  document.getElementById('orderTotal').textContent = money(total);
+  const ce = document.getElementById('checkoutErr'); if(ce) ce.textContent='';
+  document.getElementById('checkoutModal').classList.add('active');
+  document.getElementById('checkoutForm').style.display = 'block';
+  document.getElementById('codeDisplay').style.display = 'none';
+}
+function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+/* --- CÓDIGO DE RETIRO --- */
+function generateSecureCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+  return code;
+}
+
+async function submitOrder(event) {
+  event.preventDefault();
+  const name = document.getElementById('customerName').value.trim();
+  const whatsapp = document.getElementById('customerWhatsapp').value.trim();
+  const err = document.getElementById('checkoutErr');
+  if(err) err.textContent = '';
+  if(!name){ if(err) err.textContent='Completá tu nombre y WhatsApp.'; return; }
+  if(whatsapp.replace(/\D/g,'').replace(/^549/,'').length < 6){ if(err) err.textContent='Completá tu número de WhatsApp después del +549.'; return; }
+
+  // agrupar items por nombre
+  const grouped = {};
+  cart.forEach(i => { (grouped[i.name] = grouped[i.name] || { nombre:i.name, precio:i.price, cantidad:0 }).cantidad++; });
+  const items = Object.values(grouped);
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  const code = generateSecureCode();
+  const venta = {
+    id: 'v'+Date.now().toString(36),
+    codigo: code, fecha: Date.now(),
+    cliente: { nombre: name, telefono: whatsapp },
+    items, total, estado: 'pendiente'
+  };
+
+  if (TENANT) guardarVentaEnNube(venta);
+  enviarWhatsApp(code, items, total);
+
+  document.getElementById('pickupCode').textContent = code;
+  document.getElementById('checkoutForm').style.display = 'none';
+  document.getElementById('codeDisplay').style.display = 'block';
+
+  cart = [];
+  updateCart();
+  document.getElementById('customerName').value = '';
+  document.getElementById('customerWhatsapp').value = '+549 ';
+}
+
+function enviarWhatsApp(code, items, total){
+  const tel = (TIENDA.telefono||'').replace(/\D/g,'');
+  if(!tel) return;
+  const detalle = items.map(i=>`${i.cantidad}x ${i.nombre}`).join(', ');
+  const msg = `Hola! Hice un pedido en ${TIENDA.nombre}.\n\n🎟️ Código de retiro: ${code}\n🍔 Pedido: ${detalle}\n💰 Total: ${money(total)} (pago al retirar)\n\n¿Me avisan cuando esté listo? ¡Gracias!`;
+  window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+async function guardarVentaEnNube(venta){
+  if(!TENANT) return;
+  try{
+    await fetch(`${SB_URL}/rest/v1/rpc/comida_agregar_venta`, {
+      method:'POST',
+      headers:{ apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json' },
+      body: JSON.stringify({ p_codigo: TENANT, p_venta: venta })
+    });
+  }catch(e){ console.warn('guardar venta:', e); }
+}
+
+/* --- COMPARTIR --- */
+function compartirTienda(){
+  const url = location.href;
+  const txt = `¡Mirá el menú de ${TIENDA.nombre}! 🍔 ${url}`;
+  const wa = document.getElementById('shareWa'), ml = document.getElementById('shareMail');
+  if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+  if (ml) ml.href = 'mailto:?subject=' + encodeURIComponent(TIENDA.nombre) + '&body=' + encodeURIComponent(txt);
+  const pop = document.getElementById('sharePop');
+  if (pop) pop.style.display = 'flex';
+}
+
+/* --- MODO OSCURO --- */
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('cr_theme', newTheme);
+  const btn = document.querySelector('.btn-theme');
+  if(btn) btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+}
+(function(){
+  const savedTheme = localStorage.getItem('cr_theme');
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const b=document.querySelector('.btn-theme'); if(b) b.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  }
+})();
+
+/* --- SUSCRIPCIÓN --- */
+function handleSubscribe(event) {
+  event.preventDefault();
+  alert('✅ ¡Gracias por suscribirte!');
+  event.target.reset();
+}
+
+/* --- CERRAR MODALES AL CLIC FUERA --- */
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+});
+
+/* --- INICIALIZAR --- */
+(async function init(){
+  await cargarTienda();
+  pintarMarca();
+  renderMenu();
+  renderPromos();
+  updateCart();
+})();
+
+    </script>
+
+</body>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   

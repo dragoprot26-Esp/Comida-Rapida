@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comida Rápida — Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#D4AF37; --gold-2:#B8860B; --gold-light:#F4E5B5;
+  --black:#0a0a0a; --dark:#1a1a1a; --charcoal:#2d2d2d;
+  --cream:#FAF7F2; --white:#fff; --gray:#8a8a8a;
+  --ink:#1a1a1a; --ink-2:#5c5c5c; --muted:#9a9a9a;
+  --accent:#C41E3A; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+  --border:#ece6da; --surface:#fff; --surface-2:#f6f1e8;
+  --radius:16px; --radius-sm:10px; --shadow:0 10px 30px rgba(0,0,0,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;min-height:100vh}
+h1,h2,h3{font-family:'Playfair Display',serif;letter-spacing:-.01em}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:1rem;width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:14px 0 5px;text-transform:uppercase;letter-spacing:.04em}
+.btn{border:none;background:linear-gradient(135deg,var(--gold),var(--gold-2));color:var(--black);border-radius:50px;padding:13px 20px;font-weight:700;font-size:.92rem;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .15s;text-transform:uppercase;letter-spacing:.06em}
+.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.btn-block{width:100%}
+.btn-ghost{background:transparent;color:var(--ink);border:2px solid var(--border)}
+.btn-soft{background:var(--surface-2);color:var(--gold-2);border:1px solid var(--border)}
+.btn-sm{padding:8px 14px;font-size:.78rem;border-radius:50px}
+.btn-bad{background:#fde8e8;color:var(--bad)}
+.btn-dark{background:var(--dark);color:var(--gold)}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:22px;background:linear-gradient(160deg,#1a1a1a,#0a0a0a 60%,#000)}
+.login-card{background:var(--white);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.5);padding:36px 28px;width:100%;max-width:400px}
+.login-logo{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:2rem;background:linear-gradient(140deg,var(--gold),var(--gold-2));color:var(--black);margin:0 auto 14px}
+.login-card h1{text-align:center;font-size:1.8rem;font-weight:900}
+.login-card .sub{text-align:center;color:var(--ink-2);font-size:.9rem;margin:4px 0 18px}
+.err{color:var(--bad);font-size:.85rem;margin-top:8px;display:none}
+.link{background:none;border:none;color:var(--gold-2);font-weight:600;font-size:.85rem;width:100%;margin-top:12px;padding:8px}
+
+/* ===== PANEL ===== */
+.topbar{position:sticky;top:0;z-index:40;background:var(--dark);color:var(--white);border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:12px;padding:12px clamp(14px,3vw,28px)}
+.topbar .tlogo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:1.4rem;background:linear-gradient(140deg,var(--gold),var(--gold-2));color:var(--black);flex:0 0 auto;overflow:hidden}
+.topbar .tlogo img{width:100%;height:100%;object-fit:cover}
+.topbar .tname{flex:1;min-width:0}
+.topbar .tname b{font-family:'Playfair Display';font-size:1.1rem;display:block;line-height:1.1;color:#fff}
+.topbar .tname small{color:var(--gold-light);font-size:.78rem}
+.chip{font-size:.74rem;font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.chip.v{background:#e7f8ee;color:var(--ok)} .chip.a{background:#fef3e2;color:var(--warn)} .chip.r{background:#fde8e8;color:var(--bad)}
+.iconbtn{border:1px solid var(--gold);background:transparent;color:var(--gold);border-radius:10px;width:40px;height:40px;font-size:1.1rem;flex:0 0 auto}
+
+.tabs{display:flex;gap:8px;padding:14px clamp(14px,3vw,28px) 0;max-width:920px;margin:0 auto;width:100%;overflow-x:auto}
+.tabs::-webkit-scrollbar{height:0}
+.tab{flex:1 0 auto;white-space:nowrap;border:1px solid var(--border);background:var(--surface);border-radius:50px;padding:11px 16px;font-weight:600;font-size:.88rem;color:var(--ink-2)}
+.tab.on{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:var(--black);border-color:var(--gold)}
+.wrap{max-width:920px;margin:0 auto;padding:18px clamp(14px,3vw,28px) 70px;width:100%}
+.sec{display:none} .sec.on{display:block}
+.sectitle{font-size:1.4rem;margin:6px 0 14px}
+.hint{font-size:.8rem;color:var(--muted);margin-top:6px}
+
+/* listas */
+.prod-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+.prod-row .th{width:58px;height:58px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:1.7rem;flex:0 0 auto;overflow:hidden}
+.prod-row .th img{width:100%;height:100%;object-fit:cover}
+.prod-row .pi{flex:1;min-width:0}
+.prod-row .pi .n{font-weight:600}
+.prod-row .pi .m{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-row .pi .pr{font-family:'Playfair Display';font-weight:700;color:var(--gold-2)}
+.badge-tag{display:inline-block;font-size:.66rem;background:var(--dark);color:var(--gold);padding:2px 8px;border-radius:999px;margin-left:6px;font-weight:700}
+.prod-actions{display:flex;gap:6px;flex:0 0 auto}
+.empty{text-align:center;color:var(--muted);padding:46px 16px}
+.empty .e{font-size:3rem;display:block;margin-bottom:8px}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(10,10,10,.8);backdrop-filter:blur(6px);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+@media(min-width:640px){.overlay{align-items:center;padding:24px}}
+.sheet{background:var(--surface);width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:94vh;overflow-y:auto;padding:24px}
+@media(min-width:640px){.sheet{border-radius:var(--radius)}}
+.sheet h3{font-size:1.5rem;margin-bottom:6px}
+.sheet .close{float:right;border:none;background:var(--surface-2);width:38px;height:38px;border-radius:999px;font-size:1.2rem}
+.img-prev{width:100%;height:170px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:3rem;overflow:hidden;border:2px dashed var(--border);margin-top:6px}
+.img-prev img{width:100%;height:100%;object-fit:cover}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--gold);padding:12px 22px;border-radius:999px;font-weight:600;font-size:.9rem;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;border:1px solid var(--gold)}
+.toast.show{opacity:1}
+
+/* ventas */
+.venta-card{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--muted);border-radius:14px;padding:14px;margin-bottom:12px}
+.venta-card.e-pendiente{border-left-color:var(--warn)}
+.venta-card.e-listo{border-left-color:var(--gold-2)}
+.venta-card.e-entregado{border-left-color:var(--ok);opacity:.8}
+.vc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.vc-cod{font-family:'Playfair Display';font-weight:900;font-size:1.25rem;letter-spacing:.1em}
+.vc-est{font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:999px}
+.vc-est.pendiente{background:#fef3e2;color:var(--warn)}
+.vc-est.listo{background:var(--gold-light);color:var(--gold-2)}
+.vc-est.entregado{background:#e7f8ee;color:var(--ok)}
+.vc-cli{font-size:.9rem;margin-bottom:6px}
+.vc-cli a{color:var(--gold-2);text-decoration:none;font-weight:600}
+.vc-items{font-size:.86rem;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:8px 10px;margin-bottom:8px}
+.vc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.vc-total b{font-family:'Playfair Display';color:var(--ink)}
+.vc-fecha{font-size:.76rem;color:var(--muted)}
+.vc-acc{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.badge-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--bad);color:#fff;font-size:.72rem;font-weight:700;margin-left:6px;vertical-align:middle}
+.bio-row{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:12px}
+.bio-row b{font-size:.98rem}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="vistaLogin" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">🍔</div>
+    <h1>Comida Rápida</h1>
+    <p class="sub">Panel de tu local</p>
+    <label>Usuario</label>
+    <input id="loginUser" autocomplete="username" placeholder="Tu usuario">
+    <label>Contraseña</label>
+    <input id="loginPass" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-block" id="loginBtn" style="margin-top:18px">Ingresar →</button>
+    <button class="link" id="linkActivar">🔑 Primera vez — activar mi licencia</button>
+    <button class="link" id="linkRecuperar" style="margin-top:2px">¿Olvidaste tu contraseña?</button>
+  </div>
+</div>
+
+<!-- ===== PANEL ===== -->
+<div id="vistaPanel" style="display:none">
+  <div class="topbar">
+    <div class="tlogo" id="barLogo">🍔</div>
+    <div class="tname"><b id="barNombre">Comida Rápida</b><small id="barUser"></small></div>
+    <span class="chip v" id="barLic">—</span>
+    <button class="iconbtn" id="btnVista" title="Ver mi página">👁️</button>
+    <button class="iconbtn" id="btnSalir" title="Cerrar sesión">🚪</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-sec="secProductos">🍔 Productos</button>
+    <button class="tab" data-sec="secPromos">🔥 Promos</button>
+    <button class="tab" data-sec="secVentas" id="tabVentas">🔔 Pedidos<span class="badge-n" id="ventasBadge" style="display:none">0</span></button>
+    <button class="tab" data-sec="secConfig">⚙️ Ajustes</button>
+  </div>
+
+  <div class="wrap">
+    <!-- PRODUCTOS -->
+    <section id="secProductos" class="sec on">
+      <button class="btn btn-block" id="btnAddProd">+ Agregar producto</button>
+      <div id="listaProd" style="margin-top:16px"></div>
+    </section>
+
+    <!-- PROMOS -->
+    <section id="secPromos" class="sec">
+      <button class="btn btn-block" id="btnAddPromo">+ Agregar promoción</button>
+      <p class="hint">Las promos aparecen en la sección "Promociones Especiales" de tu página. 🔥</p>
+      <div id="listaPromos" style="margin-top:14px"></div>
+    </section>
+
+    <!-- VENTAS -->
+    <section id="secVentas" class="sec">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <h2 class="sectitle" style="margin:0">Pedidos</h2>
+        <button class="btn btn-ghost btn-sm" id="btnRefVentas">↻ Actualizar</button>
+      </div>
+      <p class="hint" style="margin-bottom:10px">Se actualiza solo cada pocos segundos. Marcá cada pedido cuando esté listo o entregado.</p>
+      <div id="listaVentas"></div>
+    </section>
+
+    <!-- CONFIG -->
+    <section id="secConfig" class="sec">
+      <button class="btn btn-block" id="btnQR" style="margin-bottom:18px">📱 Compartir mi página (QR + link)</button>
+
+      <h2 class="sectitle">Datos del local</h2>
+      <label>Nombre del local</label>
+      <input id="cNombre" placeholder="Ej: El Buen Bocado">
+      <label>Frase / lema (subtítulo del hero)</label>
+      <input id="cTagline" placeholder="Sabor que enamora · Encargá y retirá">
+      <div class="row2">
+        <div><label>Logo (emoji)</label><input id="cLogoEmoji" maxlength="3" placeholder="🍔"></div>
+        <div><label>o subir imagen</label><input id="cLogoFile" type="file" accept="image/*"></div>
+      </div>
+      <div class="img-prev" id="cLogoPrev" style="height:120px">🍔</div>
+      <div class="row2">
+        <div><label>Dirección</label><input id="cDireccion" placeholder="Av. Principal 123"></div>
+        <div><label>WhatsApp</label><input id="cTelefono" type="tel" placeholder="+549 11 1234-5678"></div>
+      </div>
+      <p class="hint">El WhatsApp recibe los pedidos de tus clientes y aparece en el botón flotante de tu página.</p>
+      <button class="btn btn-block" id="btnGuardarConfig" style="margin-top:22px">💾 Guardar configuración</button>
+
+      <div id="bloqueSeguridad">
+        <h2 class="sectitle" style="margin-top:30px">Seguridad</h2>
+        <div class="bio-row">
+          <b>🛡️ Cuenta segura</b>
+          <div class="hint">Tu acceso es una cuenta real del servidor, ligada a tu local. Se activa sola al iniciar sesión.</div>
+          <div id="cuentaSeguraBox" style="margin-top:10px"></div>
+        </div>
+        <div class="bio-row">
+          <b>🔑 Cambiar mi contraseña</b>
+          <div class="hint">Se actualiza en el servidor y en este dispositivo.</div>
+          <label style="margin-top:8px">Contraseña actual</label>
+          <input id="cpActual" type="password" placeholder="Tu contraseña de ahora">
+          <label>Nueva contraseña</label>
+          <input id="cpNueva" type="password" placeholder="Mínimo 6 caracteres">
+          <label>Repetir nueva</label>
+          <input id="cpNueva2" type="password" placeholder="Repetí la nueva">
+          <div class="err" id="cpErr"></div>
+          <button class="btn btn-block" id="btnCambiarClave" style="margin-top:12px">🔑 Cambiar contraseña</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ===== MODAL ACTIVAR LICENCIA ===== -->
+<div class="overlay" id="ovLic">
+  <div class="sheet" style="max-width:420px">
+    <button class="close" data-close>×</button>
+    <h3>Activar licencia</h3>
+    <p class="hint">Ingresá el código que te dio tu proveedor.</p>
+    <label>Código de licencia</label>
+    <input id="inputCodigo" placeholder="COMI-..." style="text-transform:uppercase">
+    <div class="err" id="licErr"></div>
+    <button class="btn btn-block" id="btnActivar" style="margin-top:16px">Activar →</button>
+    <p class="hint" id="licMsg" style="margin-top:12px"></p>
+  </div>
+</div>
+
+<!-- ===== MODAL RECUPERAR ===== -->
+<div class="overlay" id="ovRecuperar">
+  <div class="sheet" style="max-width:440px">
+    <button class="close" data-close>×</button>
+    <h3>Recuperar acceso</h3>
+    <div class="bio-row">
+      <b>👑 Soy el dueño</b>
+      <div class="hint">Reactivá tu licencia con tu código y volvés a entrar. Si no lo tenés a mano, pedíselo a tu proveedor.</div>
+      <button class="btn btn-soft btn-block" id="btnRecActivar" style="margin-top:10px">🔑 Reactivar mi licencia</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL PRODUCTO ===== -->
+<div class="overlay" id="ovProd">
+  <div class="sheet">
+    <button class="close" data-close>×</button>
+    <h3 id="prodModalTit">Nuevo producto</h3>
+    <div class="img-prev" id="prodPrev">🍔</div>
+    <label>Foto del producto (desde el celu)</label>
+    <input id="prodFile" type="file" accept="image/*">
+    <label>o pegar URL de imagen</label>
+    <input id="prodUrl" type="url" placeholder="https://...">
+    <label>Nombre</label>
+    <input id="prodNombre" placeholder="Ej: La Clásica Rayo">
+    <label>Descripción</label>
+    <textarea id="prodDesc" rows="2" placeholder="Detalle del producto"></textarea>
+    <label>Precio</label>
+    <input id="prodPrecio" type="number" inputmode="numeric" step="0.01" placeholder="5.99">
+    <button class="btn btn-block" id="btnGuardarProd" style="margin-top:18px">💾 Guardar producto</button>
+  </div>
+</div>
+
+<!-- ===== MODAL PROMO ===== -->
+<div class="overlay" id="ovPromo">
+  <div class="sheet">
+    <button class="close" data-close>×</button>
+    <h3 id="promoModalTit">Nueva promoción</h3>
+    <div class="img-prev" id="promoPrev">🔥</div>
+    <label>Foto de la promo (desde el celu)</label>
+    <input id="promoFile" type="file" accept="image/*">
+    <label>o pegar URL de imagen</label>
+    <input id="promoUrl" type="url" placeholder="https://...">
+    <label>Nombre de la promoción</label>
+    <input id="promoNombre" placeholder="Ej: Combo Familiar">
+    <label>Descripción</label>
+    <textarea id="promoDesc" rows="2" placeholder="Detalle de la promo"></textarea>
+    <div class="row2">
+      <div><label>Precio</label><input id="promoPrecio" type="number" inputmode="numeric" step="0.01" placeholder="19.99"></div>
+      <div><label>Etiqueta / badge</label><input id="promoBadge" maxlength="14" placeholder="-20% / 2x1 / FAMILIAR"></div>
+    </div>
+    <button class="btn btn-block" id="btnGuardarPromo" style="margin-top:18px">💾 Guardar promoción</button>
+  </div>
+</div>
+
+<!-- ===== MODAL QR ===== -->
+<div class="overlay" id="ovQR">
+  <div class="sheet" style="max-width:360px;text-align:center">
+    <button class="close" data-close>×</button>
+    <h3>Tu página 🍔</h3>
+    <p class="hint">Mostralo o imprimilo. Tus clientes lo escanean y entran directo.</p>
+    <div id="qrBox" style="display:flex;justify-content:center;padding:16px;background:#fff;border-radius:16px;margin:14px auto;width:fit-content"></div>
+    <div id="qrLink" style="font-size:.78rem;color:var(--muted);word-break:break-all;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-block" id="btnQRDesc">⬇️ Descargar</button>
+      <button class="btn btn-soft btn-block" id="btnQRCopy">🔗 Copiar link</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/comun.js?v=1"></script>
+<script src="js/licencia.js?v=1"></script>
+<script src="js/admin.js?v=1"></script>
+</body>
+</html>
