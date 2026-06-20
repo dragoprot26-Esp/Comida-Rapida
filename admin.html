@@ -147,6 +147,7 @@ label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:1
     <button class="tab" data-sec="secVentas" id="tabVentas">🔔 Pedidos<span class="badge-n" id="ventasBadge" style="display:none">0</span></button>
     <button class="tab" data-sec="secConfig">⚙️ Ajustes</button>
     <button class="tab" data-sec="secPagina">🌐 Página pública</button>
+    <button class="tab" data-sec="secEquipo" id="tabEquipo" style="display:none">👥 Equipo</button>
   </div>
 
   <div class="wrap">
@@ -200,6 +201,11 @@ label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:1
           <b>🛡️ Cuenta segura</b>
           <div class="hint">Tu acceso es una cuenta real del servidor, ligada a tu local. Se activa sola al iniciar sesión.</div>
           <div id="cuentaSeguraBox" style="margin-top:10px"></div>
+        </div>
+        <div class="bio-row">
+          <b>🔒 Cerrar sesión en todos lados</b>
+          <div class="hint">¿Perdiste el celular? Desde otro dispositivo, esto cierra tu sesión en TODOS los aparatos (vas a tener que volver a entrar).</div>
+          <button class="btn btn-bad btn-block" id="btnCerrarTodo" style="margin-top:10px">🔒 Cerrar sesión en todos mis dispositivos</button>
         </div>
         <div class="bio-row">
           <b>🔑 Cambiar mi contraseña</b>
@@ -259,6 +265,15 @@ label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:1
       <p class="hint">Agregá uno o varios menús (Menú 1, Menú 2…). Cada uno con su foto.</p>
       <button class="btn btn-block" id="btnAddMenu">+ Agregar menú</button>
       <div id="listaCarta" style="margin-top:12px"></div>
+    </section>
+
+    <!-- EQUIPO -->
+    <section id="secEquipo" class="sec">
+      <h2 class="sectitle">Equipo — admins de tu local</h2>
+      <p class="hint">Hasta 3 personas por licencia (vos + 2 más). Cada una entra con su propio usuario y contraseña, y trabajan a la vez sobre el mismo local.</p>
+      <button class="btn btn-block" id="btnAddEquipo">+ Agregar admin</button>
+      <div id="listaEquipo" style="margin-top:14px"></div>
+      <p class="hint" style="margin-top:10px">Cada admin entra en esta misma página (<b>/admin.html</b>) con el usuario y la contraseña que le pongas acá. Antes tiene que activar la licencia con el código (igual que vos).</p>
     </section>
   </div>
 </div>
@@ -386,10 +401,26 @@ label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:1
   </div>
 </div>
 
+<!-- ===== MODAL EQUIPO ===== -->
+<div class="overlay" id="ovEquipo">
+  <div class="sheet" style="max-width:440px">
+    <button class="close" data-close>×</button>
+    <h3 id="eqTit">Nuevo admin</h3>
+    <label>Nombre (referencia)</label>
+    <input id="eqNombre" placeholder="Ej: Juan">
+    <label>Usuario (para login)</label>
+    <input id="eqUsuario" placeholder="ej: juan" autocomplete="off">
+    <label>Contraseña (6+ caracteres)</label>
+    <input id="eqPass" type="text" placeholder="Mínimo 6" autocomplete="new-password">
+    <p class="hint">Compartile estos datos a la persona. Va a poder editar productos, promos, página y pedidos.</p>
+    <button class="btn btn-block" id="btnGuardarEquipo" style="margin-top:14px">💾 Guardar admin</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="js/comun.js?v=2"></script>
-<script src="js/licencia.js?v=2"></script>
-<script src="js/admin.js?v=2"></script>
+<script src="js/comun.js?v=3"></script>
+<script src="js/licencia.js?v=3"></script>
+<script src="js/admin.js?v=3"></script>
 </body>
 </html>
