@@ -53,6 +53,7 @@ async function mostrarPanel(){
   pintarPromosPanel();
   pintarCuentaSegura();
   pintarPagina();
+  pintarEquipo();
   iniciarVentas();
   const b = sessionStorage.getItem('cr_bienvenida');
   if (b) { sessionStorage.removeItem('cr_bienvenida'); setTimeout(()=>toast('🎉 ¡Bienvenido/a! Cargá tus productos y promos.'), 400); }
@@ -372,6 +373,62 @@ async function delMenu(id){
   _setArr('carta',_getArr('carta').filter(x=>x.id!==id)); pintarCarta(); toast('Menú eliminado');
 }
 
+/* ===================== EQUIPO (hasta 3 admins por licencia) ===================== */
+const MAX_EQUIPO = 2; // adicionales (el principal completa los 3)
+let equipoEdit=null;
+function getEquipo(){ try{ return JSON.parse(localStorage.getItem('equipo')||'[]'); }catch(e){ return []; } }
+function setEquipo(arr){ localStorage.setItem('equipo', JSON.stringify(arr)); }
+function pintarEquipo(){
+  const tab=$('tabEquipo'); if(tab) tab.style.display = (rolActual()==='dueno') ? '' : 'none';
+  const cont=$('listaEquipo'); if(!cont) return;
+  const arr=getEquipo();
+  const btn=$('btnAddEquipo'); if(btn) btn.style.display = (arr.length>=MAX_EQUIPO) ? 'none' : '';
+  if(!arr.length){ cont.innerHTML='<div class="empty" style="padding:24px"><span class="e">👥</span>Sin admins adicionales.<br>Podés agregar hasta '+MAX_EQUIPO+'.</div>'; return; }
+  cont.innerHTML=arr.map(m=>`
+    <div class="prod-row">
+      <div class="th">👤</div>
+      <div class="pi"><div class="n">${escHtml(m.nombre||m.usuario)}</div><div class="m">usuario: ${escHtml(m.usuario)} · clave: ${escHtml(m.pass||'')}</div></div>
+      <div class="prod-actions">
+        <button class="btn btn-ghost btn-sm" data-editeq="${m.id}">✏️</button>
+        <button class="btn btn-bad btn-sm" data-deleq="${m.id}">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function abrirEquipo(id){
+  equipoEdit=id||null;
+  const m=id?getEquipo().find(x=>x.id===id):null;
+  $('eqTit').textContent=m?'Editar admin':'Nuevo admin';
+  $('eqNombre').value=m?(m.nombre||''):'';
+  $('eqUsuario').value=m?(m.usuario||''):'';
+  $('eqPass').value=m?(m.pass||''):'';
+  abrir('ovEquipo');
+}
+async function guardarEquipo(){
+  const nombre=$('eqNombre').value.trim();
+  const usuario=$('eqUsuario').value.trim().toLowerCase();
+  const pass=$('eqPass').value.trim();
+  if(!usuario||!pass){ toast('⚠️ Completá usuario y contraseña'); return; }
+  const f=claveFuerte(pass, usuario); if(!f.ok){ toast('⚠️ '+f.msg); return; }
+  const principal=(localStorage.getItem('admin_user')||'').toLowerCase();
+  if(usuario===principal){ toast('⚠️ Ese usuario es el del admin principal. Elegí otro.'); return; }
+  let arr=getEquipo();
+  if(arr.some(x=>x.usuario.toLowerCase()===usuario && x.id!==equipoEdit)){ toast('⚠️ Ya existe ese usuario.'); return; }
+  if(!equipoEdit && arr.length>=MAX_EQUIPO){ toast('⚠️ Máximo '+MAX_EQUIPO+' admins adicionales.'); return; }
+  const m={ id:equipoEdit||('eq'+Date.now().toString(36)), nombre, usuario, pass };
+  try{ await crNubeCargar(); }catch(e){}
+  arr=getEquipo();
+  if(equipoEdit) arr=arr.map(x=>x.id===equipoEdit?m:x); else arr.push(m);
+  setEquipo(arr); cerrarTodo(); pintarEquipo(); toast(equipoEdit?'✅ Admin actualizado':'✅ Admin agregado');
+}
+async function delEquipo(id){
+  const m=getEquipo().find(x=>x.id===id); if(!m) return;
+  if(!confirm('¿Quitar a '+(m.nombre||m.usuario)+'? No podrá seguir entrando.')) return;
+  try{ await crNubeCargar(); }catch(e){}
+  setEquipo(getEquipo().filter(x=>x.id!==id)); pintarEquipo();
+  try{ const cod=_crCodigo(); if(cod) await sbRPC('comida_quitar_admin', { p_codigo:cod, p_usuario:m.usuario }); }catch(e){}
+  toast('Admin quitado');
+}
+
 /* ===================== QR / COMPARTIR ===================== */
 function abrirQR(){
   const link = getLinkTienda();
@@ -576,8 +633,8 @@ $('loginBtn').addEventListener('click', async ()=>{
       }
       rol='dueno'; nombre='Dueño';
     } else {
-      const r = await asegurarCuentaSeguraColab(u, p, tenant);
-      if (r.ok){ rol='colab'; const m = await miMembresia(); nombre = (m && m.usuario) || u; }
+      const r = await asegurarCuentaSeguraEquipo(u, p, tenant);
+      if (r.ok){ rol='admin'; const m = await miMembresia(); nombre = (m && m.usuario) || u; }
     }
   }
   if (!rol){
@@ -640,6 +697,8 @@ $('cLogoFile').addEventListener('change', e=>{
 $('cLogoEmoji').addEventListener('input', e=>{ logoImg=''; const v=e.target.value.trim()||'🍔'; $('cLogoPrev').innerHTML=escHtml(v); });
 
 $('btnGuardarPagina').addEventListener('click', guardarPagina);
+$('btnAddEquipo').addEventListener('click', ()=>abrirEquipo(null));
+$('btnGuardarEquipo').addEventListener('click', guardarEquipo);
 $('btnAddEspacio').addEventListener('click', addEspacio);
 $('espFile').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f) return; comprimirImagen(f,1000,b64=>{ _espImg=b64; $('espUrl').value=''; toast('📷 Foto lista — tocá “+ Agregar imagen”'); }); });
 $('espUrl').addEventListener('input', ()=>{ _espImg=''; });
@@ -657,6 +716,12 @@ $('btnVista').addEventListener('click', async ()=>{
   if (w) w.location.href = url; else location.href = url;
 });
 $('btnSalir').addEventListener('click', logoutAdmin);
+async function cerrarSesionGlobal(){
+  if(!confirm('¿Cerrar tu sesión en TODOS los dispositivos? Vas a tener que volver a entrar.')) return;
+  try{ const tok=await authToken(); if(tok){ await fetch(`${SB_URL}/auth/v1/logout?scope=global`, { method:'POST', headers:{ apikey:SB_KEY, Authorization:'Bearer '+tok } }); } }catch(e){}
+  logoutAdmin();
+}
+if($('btnCerrarTodo')) $('btnCerrarTodo').addEventListener('click', cerrarSesionGlobal);
 $('btnRefVentas').addEventListener('click', refrescarVentasNube);
 $('btnQR').addEventListener('click', abrirQR);
 $('btnQRDesc').addEventListener('click', descargarQR);
@@ -687,6 +752,7 @@ document.addEventListener('click', e=>{
     if (tab.dataset.sec==='secProductos' && !_crPushPendiente) crNubeCargar().then(()=>pintarProductos()).catch(()=>{});
     if (tab.dataset.sec==='secPromos' && !_crPushPendiente) crNubeCargar().then(()=>pintarPromosPanel()).catch(()=>{});
     if (tab.dataset.sec==='secPagina' && !_crPushPendiente) crNubeCargar().then(()=>pintarPagina()).catch(()=>{});
+    if (tab.dataset.sec==='secEquipo' && !_crPushPendiente) crNubeCargar().then(()=>pintarEquipo()).catch(()=>{});
     return; }
   const ve=e.target.closest('[data-vest]'); if(ve){ const a=ve.dataset.vest.split('|'); cambiarEstadoVenta(a[0], a[1]); return; }
   const epr=e.target.closest('[data-editpromo]'); if(epr){ abrirPromo(epr.dataset.editpromo); return; }
@@ -698,6 +764,8 @@ document.addEventListener('click', e=>{
   const dtes=e.target.closest('[data-deltesti]'); if(dtes){ delTesti(dtes.dataset.deltesti); return; }
   const emen=e.target.closest('[data-editmenu]'); if(emen){ abrirMenu(emen.dataset.editmenu); return; }
   const dmen=e.target.closest('[data-delmenu]'); if(dmen){ delMenu(dmen.dataset.delmenu); return; }
+  const eeq=e.target.closest('[data-editeq]'); if(eeq){ abrirEquipo(eeq.dataset.editeq); return; }
+  const deq=e.target.closest('[data-deleq]'); if(deq){ delEquipo(deq.dataset.deleq); return; }
 });
 
 /* ===================== INIT ===================== */

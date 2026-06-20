@@ -150,6 +150,37 @@ async function asegurarCuentaSeguraColab(usuario, password, codigo){
   return { ok:true };
 }
 
+/* RPC anónimo (sin token del usuario) — para verificar credenciales del equipo */
+async function sbRPCanon(fn, body){
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method:'POST',
+    headers:{ apikey: SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json' },
+    body: JSON.stringify(body||{})
+  });
+  const txt = await res.text();
+  if(!res.ok) throw new Error(txt || ('rpc '+fn+' '+res.status));
+  try{ return txt ? JSON.parse(txt) : null; }catch(e){ return txt; }
+}
+
+/* Crea/entra a la cuenta de un ADMIN del EQUIPO (hasta 3 por licencia).
+   Lo usa el login cuando el usuario no es el principal de la licencia. */
+async function asegurarCuentaSeguraEquipo(usuario, password, codigo){
+  if(!usuario || !password || !codigo) return { ok:false, msg:'Faltan datos' };
+  const email = _emailDe(usuario, codigo);
+  let sess = await authSignIn(email, password);
+  if(!sess){
+    let ok=false;
+    try{ ok = await sbRPCanon('comida_verificar_equipo', { p_codigo:codigo, p_usuario:usuario, p_pass:password }); }catch(e){ ok=false; }
+    if(!ok) return { ok:false, msg:'Usuario o contraseña incorrectos.' };
+    await authSignUp(email, password);
+    sess = await authSignIn(email, password);
+  }
+  if(!sess) return { ok:false, msg:'No se pudo crear la cuenta (la clave debe tener 6+).' };
+  try{ await sbRPC('comida_unir_admin', { p_codigo:codigo, p_usuario:usuario }); }
+  catch(e){ return { ok:false, msg:(e.message||e) }; }
+  return { ok:true };
+}
+
 /* Lee la membresía (rol/local) del usuario logueado en Supabase */
 async function miMembresia(){
   const tok = await authToken(); if(!tok) return null;
@@ -169,7 +200,8 @@ const CR_SYNC_KEYS = [
   'productos', 'promos', 'colaboradores',
   'nombre_local', 'tagline', 'logo', 'direccion', 'telefono',
   /* Página pública (editable desde el panel) */
-  'horarios', 'testimonios', 'historia', 'espacio', 'carta', 'img_forma'
+  'horarios', 'testimonios', 'historia', 'espacio', 'carta', 'img_forma',
+  'equipo'
 ];
 
 let _crPush = false;
