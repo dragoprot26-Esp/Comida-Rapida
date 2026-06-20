@@ -400,10 +400,13 @@
 
         .menu-card-image {
             width: 100%;
-            height: 280px;
+            aspect-ratio: var(--card-ar, 1.33);
+            height: auto;
             object-fit: cover;
             transition: transform 0.4s ease;
         }
+        .map-link{display:flex;align-items:center;justify-content:center;gap:10px;min-height:170px;background:#f6f1e8;border:2px dashed #D4AF37;border-radius:16px;color:#1a1a1a;text-decoration:none;font-weight:700;font-size:1.05rem;padding:24px;text-align:center;line-height:1.4}
+        .map-link:hover{filter:brightness(.97)}
 
         .menu-card:hover .menu-card-image {
             transform: scale(1.05);
@@ -1276,6 +1279,7 @@
             <ul>
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#menu">Menú</a></li>
+                <li><a href="#carta">Carta</a></li>
                 <li><a href="#promos">Promos</a></li>
                 <li><a href="#galeria">Galería</a></li>
                 <li><a href="#nosotros">Nosotros</a></li>
@@ -1319,13 +1323,23 @@
     </section>
 
     <!-- GALERÍA -->
+    <!-- NUESTRA CARTA -->
+    <section class="section" id="carta" style="display:none">
+        <div class="section-header">
+            <div class="section-subtitle">Nuestra Carta</div>
+            <h2 class="section-title">Menús</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="menu-grid" id="cartaGrid"></div>
+    </section>
+
     <section class="section gallery-section" id="galeria">
         <div class="section-header">
             <div class="section-subtitle">Nuestro Espacio</div>
             <h2 class="section-title">Galería</h2>
             <div class="section-divider"></div>
         </div>
-        <div class="gallery-grid">
+        <div class="gallery-grid" id="galleryGrid">
             <div class="gallery-item">
                 <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80" alt="Interior del restaurante">
                 <div class="gallery-overlay"><span>️</span></div>
@@ -1356,12 +1370,11 @@
     <!-- SOBRE NOSOTROS -->
     <section class="section about-section" id="nosotros">
         <div class="about-content">
-            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="Nuestro restaurante" class="about-image">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="Nuestro restaurante" class="about-image" id="aboutImg">
             <div class="about-text">
                 <div class="section-subtitle">Nuestra Historia</div>
                 <h2>Pasión por la Excelencia</h2>
-                <p>Desde 2015, nos hemos dedicado a redefinir la experiencia de la comida rápida. Cada ingrediente es seleccionado cuidadosamente, cada receta es perfeccionada con amor.</p>
-                <p>Creemos que la comida rápida no debe sacrificar calidad. Por eso, trabajamos con proveedores locales y utilizamos técnicas culinarias que honran la tradición.</p>
+                <div id="aboutHistoria"></div>
                 
                 <div class="about-features">
                     <div class="feature">
@@ -1386,13 +1399,13 @@
     </section>
 
     <!-- TESTIMONIOS -->
-    <section class="section testimonials-section">
+    <section class="section testimonials-section" id="testimonios">
         <div class="section-header">
             <div class="section-subtitle">Testimonios</div>
             <h2 class="section-title">Lo Que Dicen Nuestros Clientes</h2>
             <div class="section-divider"></div>
         </div>
-        <div class="testimonials-grid">
+        <div class="testimonials-grid" id="testiGrid">
             
             <div class="testimonial-card">
                 <div class="stars">★★★★★</div>
@@ -1453,7 +1466,7 @@
             <div class="section-divider"></div>
         </div>
         <div class="map-container">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3284.016887889508!2d-58.38375908477038!3d-34.60373888045943!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccacb4f0b0e3d%3A0x3c5e0e0e0e0e0e0e!2sObelisco!5e0!3m2!1ses!2sar!4v1234567890123!5m2!1ses!2sar" allowfullscreen="" loading="lazy"></iframe>
+            <a id="mapLink" href="#" target="_blank" rel="noopener" class="map-link"><span id="mapDireccion">📍 Ver en Google Maps</span></a>
         </div>
     </section>
 
@@ -1473,7 +1486,7 @@
             <div class="contact-item">
                 <div class="contact-icon">🕐</div>
                 <h3>Horario</h3>
-                <p>Lunes a Domingo<br>11:00 AM - 11:00 PM</p>
+                <p id="contactHorario">Lunes a Domingo<br>11:00 - 23:00</p>
             </div>
             <div class="contact-item">
                 <div class="contact-icon">📞</div>
@@ -1608,6 +1621,9 @@ const defaultPromos = [
 
 let products = defaultProducts.slice();
 let promos = defaultPromos.slice();
+let testimonios = [];
+let espacioImgs = [];
+let carta = [];
 
 function esImg(s){ return typeof s === 'string' && s.indexOf('data:') === 0; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
@@ -1633,6 +1649,12 @@ async function cargarTienda(){
       TIENDA.telefono  = d.telefono || '';
       try{ products = JSON.parse(d.productos || '[]'); }catch(e){ products = []; }
       try{ promos   = JSON.parse(d.promos   || '[]'); }catch(e){ promos = []; }
+      try{ testimonios = JSON.parse(d.testimonios || '[]'); }catch(e){ testimonios = []; }
+      try{ espacioImgs = JSON.parse(d.espacio || '[]'); }catch(e){ espacioImgs = []; }
+      try{ carta = JSON.parse(d.carta || '[]'); }catch(e){ carta = []; }
+      TIENDA.horarios  = d.horarios || '';
+      TIENDA.historia  = d.historia || '';
+      TIENDA.img_forma = d.img_forma || 'rectangular';
     } else {
       products = []; promos = []; TIENDA.nombre = 'Comida Rápida'; TIENDA.tagline = '';
     }
@@ -1695,6 +1717,67 @@ function renderPromos() {
           <button class="btn-add" onclick="addToCart('${encodeURIComponent(p.name)}', ${Number(p.price)||0})">Agregar</button>
         </div>
       </div>
+    </div>`).join('');
+}
+
+/* --- SECCIONES DE LA PÁGINA PÚBLICA (editables desde el panel) --- */
+const _AR = { rectangular:'1.33', cuadrada:'1', panoramica:'1.78', alta:'0.75' };
+function aplicarFormaImg(){
+  document.documentElement.style.setProperty('--card-ar', _AR[TIENDA.img_forma] || '1.33');
+}
+function renderEspacio(){
+  const grid=document.getElementById('galleryGrid'), sec=document.getElementById('galeria');
+  if(!grid) return;
+  if(!espacioImgs.length){ if(sec) sec.style.display='none'; return; }
+  if(sec) sec.style.display='';
+  grid.innerHTML = espacioImgs.map(img=>`<div class="gallery-item"><img src="${esc(img)}" alt="Nuestro espacio"><div class="gallery-overlay"><span>👁️</span></div></div>`).join('');
+}
+function renderHistoria(){
+  const cont=document.getElementById('aboutHistoria'), sec=document.getElementById('nosotros');
+  if(!cont) return;
+  const txt=(TIENDA.historia||'').trim();
+  if(!txt){ if(sec) sec.style.display='none'; return; }
+  if(sec) sec.style.display='';
+  cont.innerHTML = txt.split(/\n+/).map(p=>`<p>${esc(p)}</p>`).join('');
+  const img=document.getElementById('aboutImg');
+  if(img && espacioImgs.length) img.src = espacioImgs[0];
+}
+function renderTestimonios(){
+  const grid=document.getElementById('testiGrid'), sec=document.getElementById('testimonios');
+  if(!grid) return;
+  if(!testimonios.length){ if(sec) sec.style.display='none'; return; }
+  if(sec) sec.style.display='';
+  grid.innerHTML = testimonios.map(t=>`
+    <div class="testimonial-card">
+      <div class="stars">${'★'.repeat(Number(t.stars)||5)}</div>
+      <p class="testimonial-text">"${esc(t.texto||'')}"</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">${esc((t.nombre||'?').charAt(0).toUpperCase())}</div>
+        <div class="author-info"><h4>${esc(t.nombre||'')}</h4><p>${esc(t.rol||'')}</p></div>
+      </div>
+    </div>`).join('');
+}
+function renderHorarios(){
+  const el=document.getElementById('contactHorario');
+  if(el && (TIENDA.horarios||'').trim()) el.innerHTML = esc(TIENDA.horarios).replace(/\n/g,'<br>');
+}
+function renderUbicacion(){
+  const a=document.getElementById('mapLink'); if(!a) return;
+  const dir=(TIENDA.direccion||'').trim();
+  if(dir){
+    a.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(dir);
+    const sp=document.getElementById('mapDireccion'); if(sp) sp.textContent='📍 '+dir+' — abrir en Google Maps';
+  } else { const sec=document.getElementById('ubicacion'); if(sec) sec.style.display='none'; }
+}
+function renderCarta(){
+  const grid=document.getElementById('cartaGrid'), sec=document.getElementById('carta');
+  if(!grid) return;
+  if(!carta.length){ if(sec) sec.style.display='none'; return; }
+  if(sec) sec.style.display='';
+  grid.innerHTML = carta.map(m=>`
+    <div class="menu-card">
+      ${m.image?`<img src="${esc(m.image)}" alt="${esc(m.nombre)}" class="menu-card-image">`:`<div class="menu-card-image" style="display:grid;place-items:center;font-size:4rem;background:var(--cream,#FAF7F2)">📋</div>`}
+      <div class="menu-card-content"><h3>${esc(m.nombre||'')}</h3><p>${esc(m.desc||'')}</p></div>
     </div>`).join('');
 }
 
@@ -1839,8 +1922,15 @@ document.querySelectorAll('.modal').forEach(modal => {
 (async function init(){
   await cargarTienda();
   pintarMarca();
+  aplicarFormaImg();
   renderMenu();
   renderPromos();
+  renderCarta();
+  renderEspacio();
+  renderHistoria();
+  renderTestimonios();
+  renderHorarios();
+  renderUbicacion();
   updateCart();
 })();
 
