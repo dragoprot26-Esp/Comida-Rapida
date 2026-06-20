@@ -405,8 +405,12 @@
             object-fit: cover;
             transition: transform 0.4s ease;
         }
-        .map-link{display:flex;align-items:center;justify-content:center;gap:10px;min-height:170px;background:#f6f1e8;border:2px dashed #D4AF37;border-radius:16px;color:#1a1a1a;text-decoration:none;font-weight:700;font-size:1.05rem;padding:24px;text-align:center;line-height:1.4}
-        .map-link:hover{filter:brightness(.97)}
+        .map-link{position:relative;display:flex;align-items:center;justify-content:center;min-height:280px;border-radius:16px;overflow:hidden;color:#fff;text-decoration:none;font-weight:700;font-size:1.05rem;padding:24px;text-align:center;line-height:1.4;background:linear-gradient(rgba(10,10,10,.40),rgba(10,10,10,.55)), url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1200&q=80') center/cover;}
+        .map-link span{background:rgba(0,0,0,.5);padding:14px 20px;border-radius:50px;backdrop-filter:blur(2px)}
+        .map-link:hover{filter:brightness(1.06)}
+        .entrega-toggle{display:flex;gap:10px}
+        .entrega-opt{flex:1;padding:12px 10px;border-radius:12px;border:2px solid #ece6da;background:#fff;color:#1a1a1a;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .15s;line-height:1.2}
+        .entrega-opt.active{border-color:#D4AF37;background:#FAF3DC}
 
         .menu-card:hover .menu-card-image {
             transform: scale(1.05);
@@ -1241,6 +1245,28 @@
             .about-features { grid-template-columns: 1fr; }
             .subscribe-form { flex-direction: column; }
         }
+        @media (max-width: 600px){
+          .hero{padding:120px 18px 70px}
+          .hero h1{font-size:2.1rem;line-height:1.15}
+          .hero p{font-size:1rem}
+          .section{padding:60px 16px}
+          .section-title{font-size:1.9rem}
+          .section-subtitle{font-size:.8rem}
+          .section-header{margin-bottom:2rem}
+          .menu-grid{grid-template-columns:1fr;gap:1.5rem}
+          .menu-card h3{font-size:1.4rem}
+          .menu-card-content{padding:1.3rem}
+          nav ul{display:none}
+          .logo{font-size:1.1rem}
+          .gallery-grid{grid-template-columns:1fr 1fr;gap:.6rem}
+          .testimonials-grid{grid-template-columns:1fr}
+          .about-content{gap:1.5rem}
+          .cart-fixed{padding:10px 12px;gap:8px}
+          .btn-checkout{font-size:.85rem;padding:12px 16px}
+          .btn-admin{font-size:.72rem;padding:8px 12px}
+          .modal-content{padding:1.6rem}
+          .map-link{min-height:210px;font-size:.95rem}
+        }
     </style>
 </head>
 <body>
@@ -1560,6 +1586,18 @@
                         <div id="checkoutErr" style="color:var(--accent);font-size:.85rem;margin-top:8px;min-height:1em"></div>
                     </div>
 
+                    <div class="form-group">
+                        <label>¿Cómo lo querés?</label>
+                        <div class="entrega-toggle">
+                            <button type="button" class="entrega-opt active" data-entrega="retiro" onclick="setEntrega('retiro')">🏬 Retiro en el local</button>
+                            <button type="button" class="entrega-opt" data-entrega="envio" onclick="setEntrega('envio')">🛵 Envío a domicilio</button>
+                        </div>
+                    </div>
+                    <div class="form-group" id="grupoDireccionEnvio" style="display:none">
+                        <label for="customerAddr">Dirección de envío</label>
+                        <input type="text" id="customerAddr" placeholder="Calle, número, piso/depto, referencia">
+                    </div>
+
                     <button type="submit" class="btn-submit">
                         Confirmar Pedido
                     </button>
@@ -1783,6 +1821,12 @@ function renderCarta(){
 
 /* --- CARRITO --- */
 let cart = [];
+let entregaTipo = 'retiro';
+function setEntrega(t){
+  entregaTipo = t;
+  document.querySelectorAll('.entrega-opt').forEach(b=>b.classList.toggle('active', b.dataset.entrega===t));
+  const g=document.getElementById('grupoDireccionEnvio'); if(g) g.style.display = (t==='envio')?'block':'none';
+}
 function addToCart(nameEnc, price) {
   const name = decodeURIComponent(nameEnc);
   cart.push({ name, price: Number(price)||0 });
@@ -1813,6 +1857,7 @@ function openCheckout() {
   document.getElementById('checkoutModal').classList.add('active');
   document.getElementById('checkoutForm').style.display = 'block';
   document.getElementById('codeDisplay').style.display = 'none';
+  setEntrega('retiro');
 }
 function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
 
@@ -1832,6 +1877,8 @@ async function submitOrder(event) {
   if(err) err.textContent = '';
   if(!name){ if(err) err.textContent='Completá tu nombre y WhatsApp.'; return; }
   if(whatsapp.replace(/\D/g,'').replace(/^549/,'').length < 6){ if(err) err.textContent='Completá tu número de WhatsApp después del +549.'; return; }
+  const addr = document.getElementById('customerAddr') ? document.getElementById('customerAddr').value.trim() : '';
+  if(entregaTipo==='envio' && !addr){ if(err) err.textContent='Completá la dirección de envío.'; return; }
 
   // agrupar items por nombre
   const grouped = {};
@@ -1843,11 +1890,12 @@ async function submitOrder(event) {
     id: 'v'+Date.now().toString(36),
     codigo: code, fecha: Date.now(),
     cliente: { nombre: name, telefono: whatsapp },
-    items, total, estado: 'pendiente'
+    items, total, estado: 'pendiente',
+    entrega: entregaTipo, direccionEnvio: (entregaTipo==='envio' ? addr : '')
   };
 
   if (TENANT) guardarVentaEnNube(venta);
-  enviarWhatsApp(code, items, total);
+  enviarWhatsApp(code, items, total, entregaTipo, addr);
 
   document.getElementById('pickupCode').textContent = code;
   document.getElementById('checkoutForm').style.display = 'none';
@@ -1859,11 +1907,12 @@ async function submitOrder(event) {
   document.getElementById('customerWhatsapp').value = '+549 ';
 }
 
-function enviarWhatsApp(code, items, total){
+function enviarWhatsApp(code, items, total, entrega, addr){
   const tel = (TIENDA.telefono||'').replace(/\D/g,'');
   if(!tel) return;
   const detalle = items.map(i=>`${i.cantidad}x ${i.nombre}`).join(', ');
-  const msg = `Hola! Hice un pedido en ${TIENDA.nombre}.\n\n🎟️ Código de retiro: ${code}\n🍔 Pedido: ${detalle}\n💰 Total: ${money(total)} (pago al retirar)\n\n¿Me avisan cuando esté listo? ¡Gracias!`;
+  const modo = (entrega==='envio') ? `🛵 Envío a: ${addr||'(a coordinar)'}` : '🏬 Retiro en el local';
+  const msg = `Hola! Hice un pedido en ${TIENDA.nombre}.\n\n🎟️ Código: ${code}\n${modo}\n🍔 Pedido: ${detalle}\n💰 Total: ${money(total)}\n\n¿Me confirman? ¡Gracias!`;
   window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
