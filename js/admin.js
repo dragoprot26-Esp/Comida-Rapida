@@ -459,6 +459,7 @@ function pintarVentas(){
   cont.innerHTML = ventasCache.map(v=>{
     const est = v.estado || 'pendiente';
     const items = (v.items||[]).map(i=>`${i.cantidad||1}× ${escHtml(i.nombre||'')}`).join(' · ');
+    const ent = (v.entrega==='envio') ? ('🛵 Envío'+(v.direccionEnvio?(' → '+escHtml(v.direccionEnvio)):'')) : '🏬 Retiro en el local';
     const tel = (v.cliente && v.cliente.telefono) || '';
     const telLink = tel ? `<a href="https://wa.me/${tel.replace(/\D/g,'')}" target="_blank">📞 ${escHtml(tel)}</a>` : '';
     let acc = '';
@@ -468,6 +469,7 @@ function pintarVentas(){
     return `<div class="venta-card e-${est}">
       <div class="vc-top"><span class="vc-cod">${escHtml(v.codigo)}</span><span class="vc-est ${est}">${lbl[est]||est}</span></div>
       <div class="vc-cli">👤 <b>${escHtml((v.cliente&&v.cliente.nombre)||'')}</b> · ${telLink}</div>
+      <div class="vc-cli">${ent}</div>
       <div class="vc-items">${items}</div>
       <div class="vc-foot"><span class="vc-total">Total: <b>${fmtMoney(v.total)}</b></span><span class="vc-fecha">${fmtFechaCorta(v.fecha)}</span></div>
       <div class="vc-acc">${acc}</div>
