@@ -52,6 +52,7 @@ async function mostrarPanel(){
   pintarProductos();
   pintarPromosPanel();
   pintarCuentaSegura();
+  pintarPagina();
   iniciarVentas();
   const b = sessionStorage.getItem('cr_bienvenida');
   if (b) { sessionStorage.removeItem('cr_bienvenida'); setTimeout(()=>toast('🎉 ¡Bienvenido/a! Cargá tus productos y promos.'), 400); }
@@ -238,6 +239,137 @@ function guardarConfig(){
   setCfg('logo', logoImg || $('cLogoEmoji').value.trim() || '🍔');
   pintarBarra();
   toast('💾 Configuración guardada');
+}
+
+/* ===================== PÁGINA PÚBLICA ===================== */
+function _getArr(key){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ return []; } }
+function _setArr(key,arr){ localStorage.setItem(key, JSON.stringify(arr)); }
+
+function pintarPagina(){
+  if(!$('pImgForma')) return;
+  $('pImgForma').value = cfg('img_forma','rectangular');
+  $('pHorarios').value = cfg('horarios','');
+  $('pDireccion').value = cfg('direccion','');
+  $('pHistoria').value = cfg('historia','');
+  pintarEspacio(); pintarTesti(); pintarCarta();
+}
+function guardarPagina(){
+  setCfg('img_forma', $('pImgForma').value || 'rectangular');
+  setCfg('horarios', $('pHorarios').value.trim());
+  setCfg('direccion', $('pDireccion').value.trim());
+  setCfg('historia', $('pHistoria').value.trim());
+  if ($('cDireccion')) $('cDireccion').value = $('pDireccion').value.trim();
+  toast('💾 Página actualizada');
+}
+
+/* --- Nuestro espacio (galería) --- */
+let _espImg='';
+function pintarEspacio(){
+  const arr=_getArr('espacio'); const cont=$('listaEspacio'); if(!cont) return;
+  if(!arr.length){ cont.innerHTML='<div class="empty" style="padding:24px"><span class="e">🖼️</span>Sin fotos todavía.</div>'; return; }
+  cont.innerHTML=arr.map((img,i)=>`
+    <div class="prod-row">
+      <div class="th">${tieneImg(img)?`<img src="${escHtml(img)}">`:'🖼️'}</div>
+      <div class="pi"><div class="m">Imagen ${i+1}</div></div>
+      <div class="prod-actions"><button class="btn btn-bad btn-sm" data-delesp="${i}">🗑️</button></div>
+    </div>`).join('');
+}
+async function addEspacio(){
+  let img=_espImg;
+  if(!esImg(img)) img=$('espUrl').value.trim();
+  if(!img){ toast('⚠️ Subí una imagen o pegá una URL'); return; }
+  try{ await crNubeCargar(); }catch(e){}
+  const arr=_getArr('espacio'); arr.push(img); _setArr('espacio',arr);
+  _espImg=''; $('espUrl').value=''; $('espFile').value='';
+  pintarEspacio(); toast('✅ Imagen agregada');
+}
+async function delEspacio(i){
+  if(!confirm('¿Eliminar esta imagen?')) return;
+  try{ await crNubeCargar(); }catch(e){}
+  const arr=_getArr('espacio'); arr.splice(i,1); _setArr('espacio',arr); pintarEspacio(); toast('Imagen eliminada');
+}
+
+/* --- Testimonios --- */
+let testiEdit=null;
+function pintarTesti(){
+  const arr=_getArr('testimonios'); const cont=$('listaTesti'); if(!cont) return;
+  if(!arr.length){ cont.innerHTML='<div class="empty" style="padding:24px"><span class="e">💬</span>Sin testimonios todavía.</div>'; return; }
+  cont.innerHTML=arr.map(t=>`
+    <div class="prod-row">
+      <div class="th" style="font-size:.9rem;color:var(--gold-2)">${'★'.repeat(Number(t.stars)||5)}</div>
+      <div class="pi"><div class="n">${escHtml(t.nombre||'')}</div><div class="m">${escHtml(t.texto||'')}</div></div>
+      <div class="prod-actions">
+        <button class="btn btn-ghost btn-sm" data-edittesti="${t.id}">✏️</button>
+        <button class="btn btn-bad btn-sm" data-deltesti="${t.id}">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function abrirTesti(id){
+  testiEdit=id||null;
+  const t=id?_getArr('testimonios').find(x=>x.id===id):null;
+  $('testiTit').textContent=t?'Editar testimonio':'Nuevo testimonio';
+  $('testiNombre').value=t?(t.nombre||''):'';
+  $('testiRol').value=t?(t.rol||''):'';
+  $('testiTexto').value=t?(t.texto||''):'';
+  $('testiStars').value=t?String(t.stars||5):'5';
+  abrir('ovTesti');
+}
+async function guardarTesti(){
+  const nombre=$('testiNombre').value.trim();
+  if(!nombre){ toast('⚠️ Poné el nombre'); return; }
+  const t={ id:testiEdit||('t'+Date.now().toString(36)), nombre, rol:$('testiRol').value.trim(), texto:$('testiTexto').value.trim(), stars:Number($('testiStars').value)||5 };
+  try{ await crNubeCargar(); }catch(e){}
+  let arr=_getArr('testimonios');
+  if(testiEdit) arr=arr.map(x=>x.id===testiEdit?t:x); else arr.unshift(t);
+  _setArr('testimonios',arr); cerrarTodo(); pintarTesti(); toast(testiEdit?'✅ Testimonio actualizado':'✅ Testimonio agregado');
+}
+async function delTesti(id){
+  if(!confirm('¿Eliminar este testimonio?')) return;
+  try{ await crNubeCargar(); }catch(e){}
+  _setArr('testimonios',_getArr('testimonios').filter(x=>x.id!==id)); pintarTesti(); toast('Testimonio eliminado');
+}
+
+/* --- Nuestra Carta (menús) --- */
+let menuEdit=null; let menuImg='';
+function pintarCarta(){
+  const arr=_getArr('carta'); const cont=$('listaCarta'); if(!cont) return;
+  if(!arr.length){ cont.innerHTML='<div class="empty" style="padding:24px"><span class="e">📋</span>Sin menús todavía.</div>'; return; }
+  cont.innerHTML=arr.map(m=>`
+    <div class="prod-row">
+      <div class="th">${tieneImg(m.image)?`<img src="${escHtml(m.image)}">`:'📋'}</div>
+      <div class="pi"><div class="n">${escHtml(m.nombre||'')}</div><div class="m">${escHtml(m.desc||'')}</div></div>
+      <div class="prod-actions">
+        <button class="btn btn-ghost btn-sm" data-editmenu="${m.id}">✏️</button>
+        <button class="btn btn-bad btn-sm" data-delmenu="${m.id}">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+function abrirMenu(id){
+  menuEdit=id||null;
+  const m=id?_getArr('carta').find(x=>x.id===id):null;
+  $('menuTit').textContent=m?'Editar menú':'Nuevo menú';
+  $('menuNombre').value=m?(m.nombre||''):'';
+  $('menuDesc').value=m?(m.desc||''):'';
+  menuImg=m?(m.image||''):'';
+  $('menuUrl').value=(menuImg&&!esImg(menuImg))?menuImg:'';
+  $('menuPrev').innerHTML=tieneImg(menuImg)?`<img src="${escHtml(menuImg)}">`:'📋';
+  $('menuFile').value='';
+  abrir('ovMenu');
+}
+async function guardarMenu(){
+  const nombre=$('menuNombre').value.trim();
+  if(!nombre){ toast('⚠️ Poné el nombre del menú'); return; }
+  if(!esImg(menuImg)) menuImg=$('menuUrl').value.trim();
+  const m={ id:menuEdit||('m'+Date.now().toString(36)), nombre, desc:$('menuDesc').value.trim(), image:menuImg||'' };
+  try{ await crNubeCargar(); }catch(e){}
+  let arr=_getArr('carta');
+  if(menuEdit) arr=arr.map(x=>x.id===menuEdit?m:x); else arr.push(m);
+  _setArr('carta',arr); cerrarTodo(); pintarCarta(); toast(menuEdit?'✅ Menú actualizado':'✅ Menú agregado');
+}
+async function delMenu(id){
+  if(!confirm('¿Eliminar este menú?')) return;
+  try{ await crNubeCargar(); }catch(e){}
+  _setArr('carta',_getArr('carta').filter(x=>x.id!==id)); pintarCarta(); toast('Menú eliminado');
 }
 
 /* ===================== QR / COMPARTIR ===================== */
@@ -505,6 +637,17 @@ $('cLogoFile').addEventListener('change', e=>{
 });
 $('cLogoEmoji').addEventListener('input', e=>{ logoImg=''; const v=e.target.value.trim()||'🍔'; $('cLogoPrev').innerHTML=escHtml(v); });
 
+$('btnGuardarPagina').addEventListener('click', guardarPagina);
+$('btnAddEspacio').addEventListener('click', addEspacio);
+$('espFile').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f) return; comprimirImagen(f,1000,b64=>{ _espImg=b64; $('espUrl').value=''; toast('📷 Foto lista — tocá “+ Agregar imagen”'); }); });
+$('espUrl').addEventListener('input', ()=>{ _espImg=''; });
+$('btnAddTesti').addEventListener('click', ()=>abrirTesti(null));
+$('btnGuardarTesti').addEventListener('click', guardarTesti);
+$('btnAddMenu').addEventListener('click', ()=>abrirMenu(null));
+$('btnGuardarMenu').addEventListener('click', guardarMenu);
+$('menuFile').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f) return; comprimirImagen(f,1000,b64=>{ menuImg=b64; $('menuUrl').value=''; $('menuPrev').innerHTML=`<img src="${b64}">`; }); });
+$('menuUrl').addEventListener('input', e=>{ const v=e.target.value.trim(); if(v&&!esImg(menuImg)){ menuImg=v; $('menuPrev').innerHTML=`<img src="${escHtml(v)}">`; } });
+
 $('btnVista').addEventListener('click', async ()=>{
   const w = window.open('about:blank', '_blank');
   try { if (typeof crNubeGuardar === 'function') await crNubeGuardar(); } catch(e){}
@@ -541,12 +684,18 @@ document.addEventListener('click', e=>{
     document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on')); $(tab.dataset.sec).classList.add('on');
     if (tab.dataset.sec==='secProductos' && !_crPushPendiente) crNubeCargar().then(()=>pintarProductos()).catch(()=>{});
     if (tab.dataset.sec==='secPromos' && !_crPushPendiente) crNubeCargar().then(()=>pintarPromosPanel()).catch(()=>{});
+    if (tab.dataset.sec==='secPagina' && !_crPushPendiente) crNubeCargar().then(()=>pintarPagina()).catch(()=>{});
     return; }
   const ve=e.target.closest('[data-vest]'); if(ve){ const a=ve.dataset.vest.split('|'); cambiarEstadoVenta(a[0], a[1]); return; }
   const epr=e.target.closest('[data-editpromo]'); if(epr){ abrirPromo(epr.dataset.editpromo); return; }
   const dpr=e.target.closest('[data-delpromo]'); if(dpr){ eliminarPromo(dpr.dataset.delpromo); return; }
   const ed=e.target.closest('[data-edit]'); if(ed){ abrirProd(ed.dataset.edit); return; }
   const dl=e.target.closest('[data-del]');  if(dl){ eliminarProd(dl.dataset.del); return; }
+  const desp=e.target.closest('[data-delesp]'); if(desp){ delEspacio(Number(desp.dataset.delesp)); return; }
+  const etes=e.target.closest('[data-edittesti]'); if(etes){ abrirTesti(etes.dataset.edittesti); return; }
+  const dtes=e.target.closest('[data-deltesti]'); if(dtes){ delTesti(dtes.dataset.deltesti); return; }
+  const emen=e.target.closest('[data-editmenu]'); if(emen){ abrirMenu(emen.dataset.editmenu); return; }
+  const dmen=e.target.closest('[data-delmenu]'); if(dmen){ delMenu(dmen.dataset.delmenu); return; }
 });
 
 /* ===================== INIT ===================== */

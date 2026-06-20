@@ -167,7 +167,9 @@ async function miMembresia(){
    ===================================================================== */
 const CR_SYNC_KEYS = [
   'productos', 'promos', 'colaboradores',
-  'nombre_local', 'tagline', 'logo', 'direccion', 'telefono'
+  'nombre_local', 'tagline', 'logo', 'direccion', 'telefono',
+  /* Página pública (editable desde el panel) */
+  'horarios', 'testimonios', 'historia', 'espacio', 'carta', 'img_forma'
 ];
 
 let _crPush = false;
