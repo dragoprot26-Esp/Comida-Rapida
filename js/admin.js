@@ -643,9 +643,38 @@ $('loginBtn').addEventListener('click', async ()=>{
   sessionStorage.setItem('cr_logged','true');
   sessionStorage.setItem('cr_rol', rol);
   sessionStorage.setItem('cr_user', nombre);
+  // Registrar la huella en este equipo si el usuario lo tildó
+  try {
+    if (window.Bio && $('bioActivar') && $('bioActivar').checked && await Bio.bioSupported()) {
+      await Bio.bioEnable({ codigo: tenant, usuario: u, password: p, rol: rol });
+    }
+  } catch(e){ /* si la huella falla, igual entra */ }
   mostrarPanel();
 });
 $('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') $('loginBtn').click(); });
+
+/* ===== Ingreso biométrico (huella / Face ID) ===== */
+$('bioLoginBtn') && $('bioLoginBtn').addEventListener('click', async ()=>{
+  const err=$('loginErr'); err.style.display='none';
+  try {
+    const creds = await Bio.bioLogin();
+    if (!creds){ err.textContent='⚠️ No se pudo leer la huella. Entrá con tus datos.'; err.style.display='block'; return; }
+    const ok = await activarLicencia(creds.codigo);
+    if (!ok){ err.textContent='⚠️ Licencia vencida. Reingresá con tus datos.'; err.style.display='block'; return; }
+    $('loginUser').value = creds.usuario;
+    $('loginPass').value = creds.password;
+    $('loginBtn').click();
+  } catch(e){ err.textContent='⚠️ Huella cancelada o no disponible en este dispositivo.'; err.style.display='block'; }
+});
+// Mostrar/ocultar los controles biométricos según el dispositivo
+(async ()=>{
+  try {
+    if (window.Bio && await Bio.bioSupported()) {
+      if (Bio.bioEnabled()) { $('bioLoginBtn').style.display='block'; $('bioSep').style.display='block'; }
+      else if ($('bioActivarWrap')) { $('bioActivarWrap').style.display='block'; }
+    }
+  } catch(e){}
+})();
 $('linkActivar').addEventListener('click', ()=>abrir('ovLic'));
 $('linkRecuperar').addEventListener('click', ()=>abrir('ovRecuperar'));
 $('btnRecActivar').addEventListener('click', ()=>{ cerrarTodo(); abrir('ovLic'); });
