@@ -120,11 +120,18 @@ label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:1
     <div class="login-logo">🍔</div>
     <h1>Comida Rápida</h1>
     <p class="sub">Panel de tu local</p>
+
+    <button class="btn btn-block" id="bioLoginBtn" style="display:none;margin-bottom:8px;background:linear-gradient(140deg,#16a34a,#15803d);color:#fff">🔐 Ingresar con huella / Face ID</button>
+    <div id="bioSep" style="display:none;text-align:center;color:var(--ink-2);font-size:.75rem;margin:6px 0 12px">— o con tus datos —</div>
+
     <label>Usuario</label>
     <input id="loginUser" autocomplete="username" placeholder="Tu usuario">
     <label>Contraseña</label>
     <input id="loginPass" type="password" autocomplete="current-password" placeholder="Tu contraseña">
     <div class="err" id="loginErr"></div>
+    <label id="bioActivarWrap" style="display:none;font-size:.78rem;color:var(--ink-2);margin-top:12px;font-weight:600;cursor:pointer">
+      <input type="checkbox" id="bioActivar" style="vertical-align:middle"> 🔒 Activar ingreso con huella / Face ID en este dispositivo
+    </label>
     <button class="btn btn-block" id="loginBtn" style="margin-top:18px">Ingresar →</button>
     <button class="link" id="linkActivar">🔑 Primera vez — activar mi licencia</button>
     <button class="link" id="linkRecuperar" style="margin-top:2px">¿Olvidaste tu contraseña?</button>
@@ -421,6 +428,7 @@ label{font-size:.82rem;font-weight:600;color:var(--ink-2);display:block;margin:1
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="js/comun.js?v=3"></script>
 <script src="js/licencia.js?v=3"></script>
-<script src="js/admin.js?v=3"></script>
+<script src="js/biometrico.js?v=1"></script>
+<script src="js/admin.js?v=4"></script>
 </body>
 </html>
