@@ -472,17 +472,11 @@ function fmtFechaCorta(ts){
 async function refrescarVentasNube(){
   const codigo = _crCodigo();
   if (!codigo) return;
-  const bearer = (await authToken()) || SB_KEY;
   try{
-    const res = await fetch(
-      `${SB_URL}/rest/v1/${CR_BACKUPS}?tenant_id=eq.${encodeURIComponent(codigo)}&select=datos&limit=1`,
-      { cache:'no-store', headers:{ apikey:SB_KEY, Authorization:'Bearer '+bearer } });
-    if (!res.ok) return;
-    const rows = await res.json();
+    // Egress: pedimos SOLO las ventas (RPC liviano), no todo el datos con imágenes.
+    const raw = await sbRPC('comida_ventas', { p_codigo: codigo });
     let ventas = [];
-    if (rows && rows.length && rows[0].datos){
-      try{ ventas = JSON.parse(rows[0].datos.ventas || '[]'); }catch(e){ ventas = []; }
-    }
+    try{ ventas = JSON.parse(raw || '[]') || []; }catch(e){ ventas = []; }
     ventas.sort((a,b)=>(b.fecha||0)-(a.fecha||0));
     const ids = new Set(ventas.map(v=>v.id));
     if (_ventasIds !== null){
@@ -562,7 +556,7 @@ async function cambiarEstadoVenta(id, estado){
 function iniciarVentas(){
   refrescarVentasNube();
   if (_ventasTimer) clearInterval(_ventasTimer);
-  _ventasTimer = setInterval(refrescarVentasNube, 20000);
+  _ventasTimer = setInterval(refrescarVentasNube, 30000);
 }
 
 /* ===================== SEGURIDAD ===================== */
